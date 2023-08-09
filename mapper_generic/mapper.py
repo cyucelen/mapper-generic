@@ -81,14 +81,12 @@ class GenericMapper(InlineMapper):
         """
         if self._is_defined("map_schema_message"):
             stream_name = message_dict["stream"]
-            transformed_message = self.custom_mapper.map_schema_message(
-                message_dict
-            )
-            if transformed_message["stream"] != stream_name:
-                raise Exception(
-                    "Altering stream name using this mapper is unsafe and not allowed."
-                )
-            yield singer.SchemaMessage.from_dict(transformed_message)
+            for message in self.custom_mapper.map_schema_message(message_dict):
+                if message["stream"] != stream_name:
+                    raise Exception(
+                        "Altering stream name using this mapper is unsafe and not allowed."
+                    )
+                yield singer.SchemaMessage.from_dict(message)
         else:
             yield singer.SchemaMessage.from_dict(message_dict)
 
@@ -102,14 +100,8 @@ class GenericMapper(InlineMapper):
             message_dict: A RECORD message JSON dictionary.
         """
         if self._is_defined("map_record_message"):
-            yield t.cast(
-                RecordMessage,
-                RecordMessage.from_dict(
-                    self.custom_mapper.map_record_message(
-                        message_dict
-                    )
-                )
-            )
+            for message in self.custom_mapper.map_record_message(message_dict):
+                yield t.cast(RecordMessage, RecordMessage.from_dict(message))
         else:
             yield t.cast(RecordMessage, RecordMessage.from_dict(message_dict))
 
@@ -120,13 +112,10 @@ class GenericMapper(InlineMapper):
             message_dict: A STATE message JSON dictionary.
         """
         if self._is_defined("map_state_message"):
-            yield singer.StateMessage.from_dict(
-                self.custom_mapper.map_state_message(
-                    message_dict
-                )
-            )
+            for message in self.custom_mapper.map_state_message(message_dict):
+                yield singer.StateMessage.from_dict(message)
         else:
-           yield singer.StateMessage.from_dict(message_dict)
+            yield singer.StateMessage.from_dict(message_dict)
 
     def map_activate_version_message(
         self,
@@ -138,13 +127,10 @@ class GenericMapper(InlineMapper):
             message_dict: An ACTIVATE_VERSION message JSON dictionary.
         """
         if self._is_defined("map_activate_version_message"):
-            yield singer.ActivateVersionMessage.from_dict(
-                self.custom_mapper.map_activate_version_message(
-                    message_dict
-                )
-            )
+            for message in self.custom_mapper.map_activate_version_message(message_dict):
+                yield singer.ActivateVersionMessage.from_dict(message)
         else:
-           yield singer.ActivateVersionMessage.from_dict(message_dict)
+            yield singer.ActivateVersionMessage.from_dict(message_dict)
 
 
 if __name__ == "__main__":
