@@ -80,12 +80,7 @@ class GenericMapper(InlineMapper):
             message_dict: A SCHEMA message JSON dictionary.
         """
         if self._is_defined("map_schema_message"):
-            stream_name = message_dict["stream"]
             for message in self.custom_mapper.map_schema_message(message_dict):
-                if message["stream"] != stream_name:
-                    raise Exception(
-                        "Altering stream name using this mapper is unsafe and not allowed."
-                    )
                 yield singer.SchemaMessage.from_dict(message)
         else:
             yield singer.SchemaMessage.from_dict(message_dict)
